@@ -1,7 +1,8 @@
 const { updateRoomByID, getRoomByID } = require("../utils/dataStore");
+const { sendMessage } = require("./sendMessage");
 
 const nextTurn = (socket, payload) => {
-  console.log("next Turn");
+  console.log("next Turn request from : ", socket.id);
   const currentRoom = getRoomByID(payload.roomId);
   currentRoom.currentChosenWord = "";
   // console.log("before" + currentRoom.currentTurn);
@@ -10,9 +11,11 @@ const nextTurn = (socket, payload) => {
   } else {
     currentRoom.currentTurn = currentRoom.currentTurn + 1;
   }
-  // console.log(currentRoom.currentTurn);
+  console.log(currentRoom.currentTurn);
 
   updateRoomByID(currentRoom.roomId);
+
+  sendMessage(socket, { roomId: payload.roomId, message: "New game started" });
 
   socket.emit(
     "/nextTurnResponse",
@@ -20,7 +23,8 @@ const nextTurn = (socket, payload) => {
       status: 200,
       nextTurnDetails: {
         currentTurnIndex: currentRoom.currentTurn,
-        currentTurnPID: socket.id,
+        currentTurnPID:
+          currentRoom.roomPlayers[currentRoom.currentTurn].playerSocketId,
       },
     })
   );
@@ -29,8 +33,11 @@ const nextTurn = (socket, payload) => {
     "/nextTurnResponse",
     JSON.stringify({
       status: 200,
-      playerTurn: currentRoom.currentTurn,
-      currentTurnPID: socket.id,
+      nextTurnDetails: {
+        currentTurnIndex: currentRoom.currentTurn,
+        currentTurnPID:
+          currentRoom.roomPlayers[currentRoom.currentTurn].playerSocketId,
+      },
     })
   );
 };

@@ -13,11 +13,10 @@ const sendMessage = (socket, payload) => {
 
   const message = {
     message:
-      payload.message == currentRoom.currentWord
+      payload.message == currentRoom.currentChosenWord
         ? "guessed correct word"
         : payload.message,
     playerName: senderDetails.playerName,
-    // timeStamp: new Date(),
   };
 
   currentRoom.roomMessages.push(message);
